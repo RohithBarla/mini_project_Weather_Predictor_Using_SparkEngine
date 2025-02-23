@@ -1,28 +1,100 @@
-Weather predictor based on spark
+# Weather Predictor Using Spark
 
+## Overview
+The **Weather Predictor Application** is a data-driven project that leverages **Apache Spark** to analyze historical weather data and predict future weather conditions. The application processes large-scale weather datasets efficiently and applies machine learning algorithms to make accurate predictions.
 
-Update regarding the weather API
-My original disclaimer was Weather Underground (wunderground.com) was no longer providing free API accounts. At some point (I don't know exactly when), they discontinued their API service altogether. I have since signed up for a Dark Sky API. They don't have a free tier but they do have a trial account which allows 1,000 API calls per day to evaluate the service. Every API request over the free daily limit costs $0.0001.
+## Features
+- Ingests and processes large weather datasets using **PySpark**
+- Performs **Exploratory Data Analysis (EDA)**
+- Handles missing values and cleans the dataset
+- Trains a **Machine Learning model** (e.g., Linear Regression, Decision Trees) for weather prediction
+- Predicts weather parameters such as **temperature, humidity, and rainfall**
+- Provides real-time insights with **Spark Streaming (if applicable)**
 
-Summary
-I won't go into too much detail about the project since you can go to the original article on stackabuse.com; however, here is a little background if you wish to save time. (Although checkout the series, it's worth the read.)
+## Tech Stack
+- **Apache Spark** (PySpark)
+- **MLlib** (Spark’s Machine Learning library)
+- **Pandas & NumPy** (for data manipulation)
+- **Matplotlib & Seaborn** (for visualization)
+- **Jupyter Notebook / Databricks** (for development)
+- **Kafka** (if streaming is involved)
 
-The project is split into three separate Jupyter Notebooks: one to collect the weather data from the Wunderground.com developer's API (again I'm using Dark Sky's API), inspect it, and clean it; a second to further refine the features and fit the data to a Linear Regression model; and a third to train and evaluate a deep neural net regressor.
+## Dataset
+The model is trained on weather datasets that include parameters such as:
+- Date & Time
+- Temperature
+- Humidity
+- Wind Speed
+- Atmospheric Pressure
+- Rainfall/Snowfall
 
-Changes
-For the most part I did not deviate from the author's original process. I did seek to automate and streamline the code. For example, I added a progress bar to the data collection function and created another function to automatically set a target date that is 1000 days prior to the current date. I automated the code to remove features that did not show a strong correlation and implemented a stepwise regression function to automate removing features that had p-values that were too high. (The original author did this manually.)
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/weather-predictor.git
+   cd weather-predictor
+   ```
+2. Set up a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Start the application (Databricks/Spark local):
+   ```bash
+   spark-submit main.py
+   ```
 
-Added modules
-Automating the code allowed me to adapt the Python code in the Jupyter Notebooks to regular .py files. Jupyter Notebooks are fantastic tools but I believe the final product should be Python scripts that run in the background. Here are the scripts I added and a quick summary:
+## Usage
+- Load the dataset in **CSV/Parquet** format
+- Perform **data preprocessing** and feature selection
+- Train the model using **Spark MLlib**
+- Make predictions on test data
+- Evaluate the model's accuracy
+- Visualize trends and insights
 
-weather.py- a utility file that contains reused methods and variables
-collect_weather.py- uses the Requests library to download weather data for 1000 days. Also uses os.path.isfile() and a if/elif/else statement to determine whether the data from the first 500 days should be collected, data from the second 500 days should be collected, or no data is to be collected. (This no longer necessary since the daily limit is 1,000 calls.)
-preprocess.py- creates a Pandas DataFrame from the weather records and cleans the data
-train_test.py- performs some additional preprocessing and fits the data to a Linear Regression model
-train_test_dnn- uses the same weather data to train, evaluate, and test a deep neural network regressor
-Still To Do
-Update collect_weather.py to make 1,000 API calls at once instead of 500 over two days
-Update the Jupyter Notebooks for the Dark Sky API
-Replace/remove some deprecated methods in the train_test.py and train_test_dnn.py modules
-Add better documentation in the form of markdown cells to the notebooks.
-Apply the model to future forecasts and validate against actual weather data.
+## Example Code Snippet
+```python
+from pyspark.sql import SparkSession
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml.feature import VectorAssembler
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("WeatherPredictor").getOrCreate()
+
+# Load dataset
+data = spark.read.csv("weather_data.csv", header=True, inferSchema=True)
+
+# Feature Engineering
+assembler = VectorAssembler(inputCols=["temperature", "humidity", "wind_speed"], outputCol="features")
+data = assembler.transform(data)
+
+# Train Model
+lr = LinearRegression(featuresCol="features", labelCol="rainfall")
+model = lr.fit(data)
+
+# Predictions
+predictions = model.transform(data)
+predictions.show()
+```
+
+## Results
+- **Accuracy**: XX% (varies based on dataset and model used)
+- **Predicted Outputs**: Graphs showing temperature trends, humidity variations, and rainfall probability
+
+## Future Improvements
+- Implement **Deep Learning** models (LSTMs) for time series forecasting
+- Integrate with **Real-Time APIs** for live predictions
+- Deploy as a **Flask/Django Web App**
+
+## Contributors
+- **Your Name** ([GitHub Profile](https://github.com/yourusername))
+
+## License
+This project is licensed under the **MIT License**.
+
+---
+Feel free to modify it based on your specific project details!
